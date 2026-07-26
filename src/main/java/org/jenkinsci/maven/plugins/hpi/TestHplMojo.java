@@ -13,7 +13,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  *
  * @author Kohsuke Kawaguchi
  */
-@Mojo(name = "test-hpl", requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "test-hpl", requiresDependencyResolution = ResolutionScope.TEST, threadSafe = true)
 public class TestHplMojo extends HplMojo {
 
     @Component

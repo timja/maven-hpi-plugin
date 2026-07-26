@@ -85,7 +85,7 @@ import org.twdata.maven.mojoexecutor.MojoExecutor;
  * <p>Additionally, it may adjust the classpath for {@code surefire:test} to run tests against
  * different versions of various dependencies than what was configured in the POM.
  */
-@Mojo(name = "resolve-test-dependencies", requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "resolve-test-dependencies", requiresDependencyResolution = ResolutionScope.TEST, threadSafe = true)
 @SuppressFBWarnings(value = "REDOS", justification = "trusted code")
 public class TestDependencyMojo extends AbstractHpiMojo {
 

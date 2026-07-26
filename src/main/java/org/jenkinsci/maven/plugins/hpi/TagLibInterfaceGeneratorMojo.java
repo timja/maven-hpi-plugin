@@ -47,7 +47,7 @@ import org.kohsuke.stapler.jelly.groovy.TypedTagLibrary;
  *
  * @author Kohsuke Kawaguchi
  */
-@Mojo(name = "generate-taglib-interface", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
+@Mojo(name = "generate-taglib-interface", defaultPhase = LifecyclePhase.GENERATE_RESOURCES, threadSafe = true)
 public class TagLibInterfaceGeneratorMojo extends AbstractMojo {
     /**
      * The maven project.

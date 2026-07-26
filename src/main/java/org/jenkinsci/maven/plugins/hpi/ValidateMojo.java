@@ -18,7 +18,7 @@ import org.codehaus.plexus.util.FileUtils;
  *
  * @author Kohsuke Kawaguchi
  */
-@Mojo(name = "validate", defaultPhase = LifecyclePhase.VALIDATE)
+@Mojo(name = "validate", defaultPhase = LifecyclePhase.VALIDATE, threadSafe = true)
 public class ValidateMojo extends AbstractJenkinsMojo {
 
     private static final String HTTP_GITHUB_COM = "http://github.com/";

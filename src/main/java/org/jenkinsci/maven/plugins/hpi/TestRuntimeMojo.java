@@ -20,7 +20,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  *
  * @author Basil Crow
  */
-@Mojo(name = "test-runtime", requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "test-runtime", requiresDependencyResolution = ResolutionScope.TEST, threadSafe = true)
 public class TestRuntimeMojo extends AbstractJenkinsMojo {
 
     /**

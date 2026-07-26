@@ -84,9 +84,14 @@ public class PluginWorkspaceMapImpl implements PluginWorkspaceMap {
                 // truncated file.
                 channel.truncate(0);
                 channel.position(0);
-                OutputStream os = Channels.newOutputStream(channel);
-                p.store(os, " List of development files for Jenkins plugins that have been built.");
-                os.flush();
+                try (OutputStream os = new java.io.FilterOutputStream(Channels.newOutputStream(channel)) {
+                    @Override
+                    public void close() throws IOException {
+                        flush();
+                    }
+                }) {
+                    p.store(os, " List of development files for Jenkins plugins that have been built.");
+                }
             }
         }
     }
@@ -94,8 +99,12 @@ public class PluginWorkspaceMapImpl implements PluginWorkspaceMap {
     private Properties loadMap(FileChannel channel) throws IOException {
         Properties p = new Properties();
         channel.position(0);
-        InputStream is = Channels.newInputStream(channel);
-        try {
+        try (InputStream is = new java.io.FilterInputStream(Channels.newInputStream(channel)) {
+            @Override
+            public void close() throws IOException {
+                // Intentionally do not close the underlying FileChannel (callers may still use it).
+            }
+        }) {
             p.load(is);
         } catch (IllegalArgumentException x) {
             throw new IOException("Malformed " + mapFile + ": " + x, x);

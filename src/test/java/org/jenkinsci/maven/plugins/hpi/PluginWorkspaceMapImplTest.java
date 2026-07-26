@@ -61,11 +61,11 @@ class PluginWorkspaceMapImplTest {
 
         ExecutorService svc = Executors.newFixedThreadPool(8);
         try {
-            for (Future<Void> f : svc.invokeAll(tasks)) {
-                f.get(); // rethrow any failure
+            for (Future<Void> f : svc.invokeAll(tasks, 30, TimeUnit.SECONDS)) {
+                f.get(); // rethrow any failure (or CancellationException on timeout)
             }
         } finally {
-            svc.shutdown();
+            svc.shutdownNow();
             assertTrue(svc.awaitTermination(30, TimeUnit.SECONDS));
         }
 

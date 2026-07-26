@@ -42,7 +42,11 @@ import org.codehaus.plexus.archiver.jar.ManifestException;
  * @author <a href="evenisse@apache.org">Emmanuel Venisse</a>
  * @version $Id: HpiMojo.java 33552 2010-08-03 23:28:55Z olamy $
  */
-@Mojo(name = "hpi", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(
+        name = "hpi",
+        defaultPhase = LifecyclePhase.PACKAGE,
+        requiresDependencyResolution = ResolutionScope.RUNTIME,
+        threadSafe = true)
 public class HpiMojo extends AbstractJenkinsManifestMojo {
 
     /**

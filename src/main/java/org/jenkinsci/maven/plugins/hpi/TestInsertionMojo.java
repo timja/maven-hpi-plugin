@@ -26,7 +26,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 @Mojo(
         name = "insert-test",
         defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES,
-        requiresDependencyResolution = ResolutionScope.TEST)
+        requiresDependencyResolution = ResolutionScope.TEST,
+        threadSafe = true)
 public class TestInsertionMojo extends AbstractJenkinsMojo {
 
     /**

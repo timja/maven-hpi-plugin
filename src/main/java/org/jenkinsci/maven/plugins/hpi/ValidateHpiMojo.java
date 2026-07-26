@@ -19,7 +19,8 @@ import org.jenkinsci.maven.plugins.hpi.util.Utils;
 @Mojo(
         name = "validate-hpi",
         defaultPhase = LifecyclePhase.VALIDATE,
-        requiresDependencyResolution = ResolutionScope.TEST)
+        requiresDependencyResolution = ResolutionScope.TEST,
+        threadSafe = true)
 public class ValidateHpiMojo extends AbstractHpiMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {

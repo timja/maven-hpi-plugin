@@ -26,7 +26,7 @@ import org.codehaus.plexus.archiver.jar.ManifestException;
  *
  * @author Kohsuke Kawaguchi
  */
-@Mojo(name = "hpl", requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "hpl", requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true)
 public class HplMojo extends AbstractJenkinsManifestMojo {
     /**
      * Path to {@code $JENKINS_HOME}. A .hpl file will be generated to this location.

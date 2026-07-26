@@ -43,7 +43,8 @@ import org.codehaus.plexus.archiver.jar.ManifestException;
 @Mojo(
         name = "jar",
         defaultPhase = LifecyclePhase.PREPARE_PACKAGE,
-        requiresDependencyResolution = ResolutionScope.RUNTIME)
+        requiresDependencyResolution = ResolutionScope.RUNTIME,
+        threadSafe = true)
 public class JarMojo extends AbstractJenkinsManifestMojo {
 
     /**

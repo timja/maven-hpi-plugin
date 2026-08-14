@@ -57,6 +57,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.twdata.maven.mojoexecutor.MojoExecutor;
 
 /**
@@ -479,7 +480,10 @@ public class RunMojo extends AbstractHpiMojo {
             return explodedWar;
         }
 
-        Path shadow = new File(project.getBuild().getDirectory(), "hpi-run-webroot").toPath();
+        Path shadow = new File(project.getBuild().getDirectory(), "hpi-run-webroot")
+                .toPath()
+                .toAbsolutePath()
+                .normalize();
         try {
             deleteRecursively(shadow);
 
@@ -488,7 +492,7 @@ public class RunMojo extends AbstractHpiMojo {
             Set<Path> realDirs = new LinkedHashSet<>();
             realDirs.add(shadow);
             for (WebrootLink link : links) {
-                Path relative = shadow.resolve(link.getPath()).normalize();
+                Path relative = resolveWithin(shadow, link.getPath());
                 for (Path parent = relative.getParent();
                         parent != null && parent.startsWith(shadow);
                         parent = parent.getParent()) {
@@ -512,7 +516,7 @@ public class RunMojo extends AbstractHpiMojo {
             }
 
             for (WebrootLink link : links) {
-                Path target = shadow.resolve(link.getPath()).normalize();
+                Path target = resolveWithin(shadow, link.getPath());
                 if (!link.getTarget().exists()) {
                     getLog().warn("Skipping web root link " + link + ": the target does not exist");
                     continue;
@@ -531,6 +535,20 @@ public class RunMojo extends AbstractHpiMojo {
         }
 
         return shadow.toFile();
+    }
+
+    /**
+     * Resolves a configured web root path, rejecting anything that would land outside the web root.
+     * Without this an absolute path, or a stray {@code ..}, would have us delete and replace a file
+     * elsewhere on disk.
+     */
+    private static Path resolveWithin(Path root, String path) throws MojoExecutionException {
+        Path resolved = root.resolve(path).normalize();
+        if (!resolved.startsWith(root) || resolved.equals(root)) {
+            throw new MojoExecutionException(
+                    "Web root link path must be relative and stay inside the web root, but was: " + path);
+        }
+        return resolved;
     }
 
     private static void deleteRecursively(Path path) throws IOException {
@@ -768,10 +786,10 @@ public class RunMojo extends AbstractHpiMojo {
     }
 
     /**
-     * Adds a whitespace-separated string of arguments to the command list.
-     * This is intentionally simple since these properties are expected to be JVM args without quoting.
+     * Adds a whitespace-separated string of arguments to the command list, honouring shell-style
+     * quoting so that an argument may itself contain whitespace.
      */
-    private static void addArgs(List<String> cmd, String args) {
+    private static void addArgs(List<String> cmd, String args) throws MojoExecutionException {
         if (args == null) {
             return;
         }
@@ -780,28 +798,19 @@ public class RunMojo extends AbstractHpiMojo {
             return;
         }
 
-        // The test harness commonly provides unquoted, whitespace-separated JVM options.
-        // Some of these are 2-token options (e.g. "--add-opens java.base/java.io=ALL-UNNAMED").
-        // Preserve those as pairs so the value doesn't get treated as a main class.
-        String[] parts = trimmed.split("\\s+");
-        for (int i = 0; i < parts.length; i++) {
-            String p = parts[i];
-            if (p == null || p.isEmpty()) {
-                continue;
-            }
-
-            if ("--add-opens".equals(p) || "--add-exports".equals(p) || "--patch-module".equals(p)) {
+        // Split on whitespace but honour quoting, so that an option whose value contains a space
+        // (a Windows path in --logfile=..., say) survives as a single argument. Two-token options
+        // such as "--add-opens java.base/java.io=ALL-UNNAMED" come through as their two tokens.
+        String[] parts;
+        try {
+            parts = CommandLineUtils.translateCommandline(trimmed);
+        } catch (Exception e) {
+            throw new MojoExecutionException("Failed to parse arguments: " + trimmed, e);
+        }
+        for (String p : parts) {
+            if (p != null && !p.isEmpty()) {
                 cmd.add(p);
-                if (i + 1 < parts.length) {
-                    String v = parts[++i];
-                    if (v != null && !v.isEmpty()) {
-                        cmd.add(v);
-                    }
-                }
-                continue;
             }
-
-            cmd.add(p);
         }
     }
 
